@@ -1,4 +1,3 @@
-# Импортируем необходимые библиотеки
 import os
 
 # Название файла, в котором будут храниться ФИО
@@ -11,25 +10,17 @@ START_LIMIT = 3
 # Ф-ия для проверки лимитов использования
 def check_start_limit():
     global file_start_restrict
-    if os.path.exists(file_start_restrict):
+    if os.path.exists(file_start_restrict):           # Проверяем, существует ли файл
         with open(file_start_restrict, 'r') as file:
-            count = int(file.read())
+            count = int(file.read())                  # Читаем число азпусков
     else:
         count = 0
     
     with open(file_start_restrict, 'w') as file:
-            count += 1
-            file.write(str(count))
+        count += 1
+        file.write(str(count))
 
     return count
-    # if count >= START_LIMIT:
-    #     print("Вы превысили лимит запусков программы.")
-    #     print("Пожалуйста, приобретите полную версию или удалите программу.")
-    #     return False
-    # else:
-    #     with open(file_start_restrict, 'w') as file:
-    #         file.write(str(count + 1))
-    #     return True
 
 # Функция для сохранения ФИО
 def save_name(name):
@@ -46,7 +37,7 @@ def name_exists(name):
 
 
 def main():
-    # Запрашиваем у пользователя ФИО
+
     fio = input("[+] Введите ваше ФИО: ")
     
     # Проверяем наличие ФИО в файле
@@ -56,7 +47,6 @@ def main():
         save_name(fio) 
         print("[+] ФИО успешно сохранено.") 
 
-# Запускаем главную функцию
 if __name__ == "__main__":
     print(" --- Приветсвуем Вас в программе fullnameDB (start-limited) ---")
     num_of_starts = check_start_limit()

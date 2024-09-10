@@ -8,6 +8,8 @@ filename = '/usr/local/share/fullnameDB/user_names.txt'
 # Путь до файла с информацией о времени работы программы:
 file_start_restrict = '/usr/local/share/fullnameDB/.time_restrict.txt'
 TIME_LIMIT = 30 
+
+#переменная-сигнал для завершения ф-ии, производящей мониторинг
 not_end = 1
 
 lock = threading.Lock()
@@ -60,7 +62,6 @@ def name_exists(name):
 
 
 def main():
-    # Запрашиваем у пользователя ФИО
     fio = input("[+] Введите ваше ФИО: ")
     
     # Проверяем наличие ФИО в файле
@@ -73,7 +74,6 @@ def main():
     with lock:
         not_end = 0
 
-# Запускаем главную функцию
 if __name__ == "__main__":
     print(" --- Приветсвуем Вас в программе fullnameDB (time-limited) ---")
     total_time = check_time_limit()
@@ -82,8 +82,9 @@ if __name__ == "__main__":
         print("    Пожалуйста, приобретите полную версию или удалите программу.")
         os._exit(0)
     print(f"[INFO] Оставшееся время пользования пробной версией: {TIME_LIMIT - total_time} секунд")
+    
+    # Мониторингом времени использования будет заниматься отдельный поток
     time_monitoring = threading.Thread(target=monitor_time, args=(total_time,))
-    #time_monitoring.deamon = True
     time_monitoring.start()
 
     main()
