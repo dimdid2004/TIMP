@@ -63,7 +63,7 @@ if __name__ == "__main__":
     if num_of_starts > START_LIMIT:
         print("[-] Вы превысили лимит запусков программы.")
         print("    Пожалуйста, приобретите полную версию или удалите программу.")
-        os._exit(1)
+        os._exit(0)
     print(f"[INFO] Осталось запусков: {START_LIMIT-num_of_starts}")
 
     main()
