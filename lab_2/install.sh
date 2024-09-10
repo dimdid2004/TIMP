@@ -31,8 +31,9 @@ mv "/usr/local/bin/${program_name}" /usr/local/bin/fullnameDB
 chmod +x "${PROG_DIR}/fullnameDB"
 
 # Создаем директорию под файл с данными
-mkdir /usr/local/share/fullnameDB/
-
+if [ ! -d "/usr/local/share/fullnameDB/" ]; then
+    mkdir /usr/local/share/fullnameDB/
+fi
 # Удаляем ненужные временные файлы 
 rm -rf build/ fullnameDB_*.spec
 

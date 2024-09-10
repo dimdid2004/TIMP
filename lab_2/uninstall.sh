@@ -16,11 +16,11 @@ else
     exit 1
 fi
 
-# Удаление папки с данными пользователей
-FIO_DIR="/usr/local/share/fullnameDB/"
-if [ -d "$FIO_DIR" ]; then
+# Удаление файла с данными пользователей
+FIO_FILE="/usr/local/share/fullnameDB/user_names.txt"
+if [ -f "$FIO_FILE" ]; then
     echo "Удаление файла c пользовательскими данными..."
-    rm -rf "$FIO_DIR"
+    rm -f "$FIO_FILE"
     echo "Файл успешно удалён."
 fi
 
