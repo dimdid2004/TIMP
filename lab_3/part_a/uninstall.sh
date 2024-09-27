@@ -47,4 +47,24 @@ echo "[+] Удаляем конфигурационные данные ..."
 rm -rf ".config"
 echo "[+] Данные успешно удалены"
 
+
+# удаляем подпись
+SYS_TAT_ASC="sys.tat.asc"
+if [ -f "$SYS_TAT_ASC" ]; then
+    # Удаление исполняемого файла
+    rm -f "$SYS_TAT_ASC"    
+fi
+
+sudo chattr -i sys.tat   
+# удаляем sys.tat
+SYS_TAT="sys.tat"
+if [ -f "$SYS_TAT" ]; then
+    # Удаление исполняемого файла
+    rm -f "$SYS_TAT"    
+fi
+
+gpg --yes --delete-secret-keys "dima <dima@did.ua>" 
+gpg --yes --delete-key "dima <dima@did.ua>" 
+
+
 echo "[+] Деинсталяция завершена."
