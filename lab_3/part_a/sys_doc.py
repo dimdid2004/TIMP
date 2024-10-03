@@ -4,15 +4,14 @@ import subprocess
 import platform
 import psutil
 import socket
+import time
 
 # Проверяем, запущена ли программа от root --> нужно для дальнейших махинаций
 def check_root():
     
     if os.geteuid() != 0:
-        print("Программа должна быть запущена с правами суперпользователя (root).")
+        print("[-] Программа должна быть запущена с правами суперпользователя (root).")
         sys.exit(1)
-    else:
-        print("Программа запущена с правами root, продолжаем выполнение.")
 
 def is_directory(dir):
     return os.path.isdir(dir)
@@ -111,10 +110,6 @@ def collect_system_info():
     # Имя компьютера
     host_name = socket.gethostname()
 
-    # Информация о процессоре
-    cpu_info = platform.processor()
-    if not cpu_info:
-        cpu_info = "Информация о процессоре недоступна"
 
     # Информация о памяти
     total_memory = psutil.virtual_memory().total / (1024 ** 3)  # Преобразуем в гигабайты
@@ -135,7 +130,6 @@ def collect_system_info():
     system_info = {
         "Имя пользователя": user_name,
         "Имя компьютера": host_name,
-        "Процессор": cpu_info,
         "Общая память (ГБ)": round(total_memory, 2),
         "Версия ОС": os_version,
         "Версия ядра": kernel_version,
@@ -160,11 +154,7 @@ def create_and_run_secure_script(dir):
 # Путь к защищаемому файлу
 FILE="sys.tat"
 
-# Включаем защиту файла (делаем его неизменяемым)
-echo "[+] Включаем защиту для файла $FILE."
-sudo chattr -i "$FILE"
-sudo chmod 000 "$FILE"
-sudo chattr +i "$FILE"
+
 
 # Запрашиваем у пользователя путь до открытого ключа
 read -p "Введите путь до открытого ключа для проверки подписи: " public_key_path
@@ -172,13 +162,22 @@ read -p "Введите путь до открытого ключа для пр�
 # Проверяем, существует ли указанный файл ключа
 if [ ! -f "$public_key_path" ]; then
     echo "[-] Открытый ключ не найден по указанному пути: $public_key_path."
+    sudo chattr -i "$FILE"
+    sudo chmod 000 "$FILE"
+    sudo chattr +i "$FILE"
     exit 1
 fi
 
+sudo chattr -i "$FILE"
+sudo chmod 644 "$FILE"
+sudo chattr +i "$FILE"
 # Импортируем открытый ключ
 gpg --import "$public_key_path" 2>/dev/null
 if [ $? -ne 0 ]; then
     echo "[-] Ошибка импорта открытого ключа."
+    sudo chattr -i "$FILE"
+    sudo chmod 000 "$FILE"
+    sudo chattr +i "$FILE"
     exit 1
 fi
 
@@ -194,7 +193,11 @@ if [ $? -eq 0 ]; then
 
     echo "[+] Доступ к просмтору файла разрешён."
 else
-    echo "[-] Подпись не верна. Защита остаётся активной."
+    # Включаем защиту файла (делаем его неизменяемым)
+    echo "[-] Подпись не верна.  Включаем защиту для файла $FILE."
+    sudo chattr -i "$FILE"
+    sudo chmod 000 "$FILE"
+    sudo chattr +i "$FILE"
     exit 1
 fi
 
@@ -216,6 +219,16 @@ fi
     except subprocess.CalledProcessError as e:
         print(f"Ошибка при выполнении скрипта {script_name}: {e}")
 
+def progress_bar(total, prefix='', suffix='', length=50, fill='█'):
+    for i in range(total + 1):
+        percent = 100 * (i / total)
+        filled_length = int(length * i // total)
+        bar = fill * filled_length + '-' * (length - filled_length)
+        print(f'\r{prefix} |{bar}| {percent:.1f}% ', end='\r')
+        time.sleep(0.1)
+    print()  # для перехода на новую строку после завершения
+
+
 
 if __name__ == "__main__":
     check_root()
@@ -232,5 +245,8 @@ if __name__ == "__main__":
     collect_system_info()
     gpg_sign_file()
     create_and_run_secure_script(user_directory)
+    print("[+] Загрузка обновлений:")
+    progress_bar(100, prefix='Прогресс', length=50)
+    print("[+] Установка обновлений завершена")
 
     

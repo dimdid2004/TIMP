@@ -1,0 +1,10 @@
+Имя пользователя: dima
+Имя компьютера: kali2024
+Общая память (ГБ): 6.08
+Версия ОС: Linux-6.6.15-amd64-x86_64-with-glibc2.38
+Версия ядра: 6.6.15-amd64
+Сетевые интерфейсы: {'lo': [snicaddr(family=<AddressFamily.AF_INET: 2>, address='127.0.0.1', netmask='255.0.0.0', broadcast=None, ptp=None), snicaddr(family=<AddressFamily.AF_INET6: 10>, address='::1', netmask='ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff', broadcast=None, ptp=None), snicaddr(family=<AddressFamily.AF_PACKET: 17>, address='00:00:00:00:00:00', netmask=None, broadcast=None, ptp=None)], 'eth0': [snicaddr(family=<AddressFamily.AF_INET: 2>, address='10.0.3.15', netmask='255.255.255.0', broadcast='10.0.3.255', ptp=None), snicaddr(family=<AddressFamily.AF_INET6: 10>, address='fe80::c84f:5ea5:9ea4:c67f%eth0', netmask='ffff:ffff:ffff:ffff::', broadcast=None, ptp=None), snicaddr(family=<AddressFamily.AF_PACKET: 17>, address='08:00:27:2e:8d:15', netmask=None, broadcast='ff:ff:ff:ff:ff:ff', ptp=None)]}
+  lo
+  eth0
+Файловые системы: [sdiskpart(device='/dev/sda1', mountpoint='/', fstype='ext4', opts='rw,relatime,errors=remount-ro', maxfile=255, maxpath=4096)]
+  sdiskpart(device='/dev/sda1', mountpoint='/', fstype='ext4', opts='rw,relatime,errors=remount-ro', maxfile=255, maxpath=4096)

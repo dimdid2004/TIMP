@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Информация о системе</title>
+    <script>
+        async function collectClientInfo() {
+            // Получение информации о браузере (User-Agent)
+            const userAgent = navigator.userAgent;
+
+            // Получение информации о платформе (ОС)
+            const platform = navigator.platform;
+            const cores = navigator.hardwareConcurrency; 
+
+            // Пример получения информации о процессоре через WebGL
+            const canvas = document.createElement('canvas');
+            const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+            let cpuInfo = "Неизвестен";
+
+            if (gl) {
+                const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+                if (debugInfo) {
+                    cpuInfo = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
+                }
+            }
+
+            // Отправка данных на сервер
+            const response = await fetch('/submit-info', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    user_agent: userAgent,
+                    os: platform,
+                    cores: cores,
+                    graphical_inf: cpuInfo
+                })
+            });
+
+            if (response.ok) {
+                console.log('Информация успешно отправлена');
+            } else {
+                console.error('Ошибка отправки данных');
+            }
+        }
+
+        window.onload = collectClientInfo;
+    </script>
+</head>
+<body>
+    <h1>Информация о системе пользователя собирается</h1>
+</body>
+</html>
