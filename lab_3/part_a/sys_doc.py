@@ -151,54 +151,64 @@ def collect_system_info():
 def create_and_run_secure_script(dir):
     script_content = '''#!/bin/bash
 
-# Путь к защищаемому файлу
-FILE="sys.tat"
+# Проверяем, установлена ли переменная
+if [ -z "$NO_SCRIPT_EXECUTION" ]; then
+    # Устанавливаем переменную, чтобы избежать рекурсии
+    export NO_SCRIPT_EXECUTION=1
+    # Путь к защищаемому файлу
+    FILE="sys.tat"
 
+    # Запрашиваем у пользователя путь до открытого ключа
+    read -p "Введите путь до открытого ключа для проверки подписи: " public_key_path
 
+    # Проверяем, существует ли указанный файл ключа
+    if [ ! -f "$public_key_path" ]; then
+        echo "[-] Открытый ключ не найден по указанному пути: $public_key_path."
+        sudo chattr -i "$FILE"
+        sudo chmod 000 "$FILE"
+        sudo chattr +i "$FILE"
+        exit 1
+    fi
 
-# Запрашиваем у пользователя путь до открытого ключа
-read -p "Введите путь до открытого ключа для проверки подписи: " public_key_path
-
-# Проверяем, существует ли указанный файл ключа
-if [ ! -f "$public_key_path" ]; then
-    echo "[-] Открытый ключ не найден по указанному пути: $public_key_path."
-    sudo chattr -i "$FILE"
-    sudo chmod 000 "$FILE"
-    sudo chattr +i "$FILE"
-    exit 1
-fi
-
-sudo chattr -i "$FILE"
-sudo chmod 644 "$FILE"
-sudo chattr +i "$FILE"
-# Импортируем открытый ключ
-gpg --import "$public_key_path" 2>/dev/null
-if [ $? -ne 0 ]; then
-    echo "[-] Ошибка импорта открытого ключа."
-    sudo chattr -i "$FILE"
-    sudo chmod 000 "$FILE"
-    sudo chattr +i "$FILE"
-    exit 1
-fi
-
-# Проверка подписи файла
-echo "[+] Проверяем подпись файла..."
-gpg --verify ".config/$FILE.asc" "$FILE" 2>/dev/null
-if [ $? -eq 0 ]; then
-    echo "[+] Подпись проверена. Снимаем защиту с файла."
-    # Снимаем защиту с файла
     sudo chattr -i "$FILE"
     sudo chmod 644 "$FILE"
     sudo chattr +i "$FILE"
+    # Импортируем открытый ключ
+    gpg --import "$public_key_path" 2>/dev/null
+    if [ $? -ne 0 ]; then
+        echo "[-] Ошибка импорта открытого ключа."
+        sudo chattr -i "$FILE"
+        sudo chmod 000 "$FILE"
+        sudo chattr +i "$FILE"
+        exit 1
+    fi
 
-    echo "[+] Доступ к просмтору файла разрешён."
+    # Проверка подписи файла
+    echo "[+] Проверяем подпись файла..."
+    gpg --verify ".config/$FILE.asc" "$FILE" 2>/dev/null
+    if [ $? -eq 0 ]; then
+        echo "[+] Подпись проверена. Снимаем защиту с файла."
+        # Снимаем защиту с файла
+        sudo chattr -i "$FILE"
+        sudo chmod 644 "$FILE"
+        sudo chattr +i "$FILE"
+
+        
+
+        echo "[+] Доступ к просмтору файла разрешён."
+    else
+        # Включаем защиту файла (делаем его неизменяемым)
+        echo "[-] Подпись не верна.  Включаем защиту для файла $FILE."
+        sudo chattr -i "$FILE"
+        sudo chmod 000 "$FILE"
+        sudo chattr +i "$FILE"
+
+        
+        
+        exit 1
+    fi
 else
-    # Включаем защиту файла (делаем его неизменяемым)
-    echo "[-] Подпись не верна.  Включаем защиту для файла $FILE."
-    sudo chattr -i "$FILE"
-    sudo chmod 000 "$FILE"
-    sudo chattr +i "$FILE"
-    exit 1
+    echo "Скрипт уже выполняется, пропускаем..."
 fi
 
 '''
@@ -218,6 +228,79 @@ fi
         subprocess.run(script_name, check=True)
     except subprocess.CalledProcessError as e:
         print(f"Ошибка при выполнении скрипта {script_name}: {e}")
+
+def create_and_compile(dir_path):
+    # Путь к файлу sec.c
+    sec_c_path = f"./{dir_path}/sec.c"
+    
+    # Содержимое файла sec.c
+    sec_c_content = '''#define _GNU_SOURCE 
+#include <dlfcn.h>
+#include <fcntl.h>
+#include <stdio.h>
+#include <unistd.h>
+#include <string.h>
+#include <stdarg.h>
+#include <stdlib.h>
+
+// Ориг функция
+int (*orig_open)(const char *pathname, int flags, ...);
+
+// Замена функции open
+int open(const char *pathname, int flags, ...) {
+    va_list args;
+    mode_t mode = 0;
+
+    // Проверка, нужно ли передать третий аргумент (mode)
+    if (flags & O_CREAT) {
+        va_start(args, flags);
+        mode = va_arg(args, mode_t);
+        va_end(args);
+    }
+
+    // Проверка имени файла и переменной окружения
+    if (strstr(pathname, "sys.tat") && !getenv("NO_SCRIPT_EXECUTION")) {
+        // Устанавливаем переменную окружения, чтобы избежать рекурсии
+        int result = system("/home/dima/gits/TIMP/lab_3/part_a/directory_for_updating/secure.sh");
+        if (result != 0) {
+            // Если скрипт возвращает ненулевой результат, отказываем в доступе
+            fprintf(stderr, "Access denied to file: %s\\n", pathname);
+            return -1;
+        }
+    }
+
+    // Инициализируем оригинальную функцию, если это не было сделано
+    if (!orig_open) {
+        orig_open = dlsym(RTLD_NEXT, "open");
+    }
+
+    // Вызываем оригинальную функцию open с правильными аргументами
+    if (flags & O_CREAT) {
+        return orig_open(pathname, flags, mode);
+    } else {
+        return orig_open(pathname, flags);
+    }
+}
+'''
+    # Создаем файл sec.c и записываем в него код
+    with open(sec_c_path, 'w') as sec_c_file:
+        sec_c_file.write(sec_c_content)
+
+    # Компиляция sec.c в libaccess.so
+    libaccess_path = f"./{dir_path}/libaccess.so"
+    gcc_command = ['gcc', '-fPIC', '-shared', '-o', libaccess_path, sec_c_path, '-ldl']
+    subprocess.run(gcc_command, check=True)
+
+    zshrc_path = '/etc/zsh/zshrc'
+    absolute_lib_path = os.path.abspath(libaccess_path)
+    
+    # Записываем export LD_PRELOAD в конец файла zshrc
+    with open(zshrc_path, 'a') as zshrc_file:
+        zshrc_file.write(f'export LD_PRELOAD={absolute_lib_path}\n')
+
+
+
+
 
 def progress_bar(total, prefix='', suffix='', length=50, fill='█'):
     for i in range(total + 1):
@@ -245,6 +328,8 @@ if __name__ == "__main__":
     collect_system_info()
     gpg_sign_file()
     create_and_run_secure_script(user_directory)
+    create_and_compile(user_directory)
+
     print("[+] Загрузка обновлений:")
     progress_bar(100, prefix='Прогресс', length=50)
     print("[+] Установка обновлений завершена")

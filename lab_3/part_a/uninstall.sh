@@ -22,6 +22,15 @@ else
     exit 1
 fi
 
+# Путь к файлу
+file="/etc/zsh/zshrc"
+
+# Строка, которую нужно удалить
+string_to_remove="export LD_PRELOAD=/home/dima/gits/TIMP/lab_3/part_a/libaccess.so"
+
+# Удаление строки из файла
+sed -i "\|$string_to_remove|d" "$file"
+
 echo "[+] Удаляем директорию с данными обновления ..."
 
 # Абсолютный путь к конфигурационному файлу в домашней директории пользователя
@@ -65,6 +74,8 @@ fi
 
 gpg --yes --delete-secret-keys "dima <dima@did.ua>" 
 gpg --yes --delete-key "dima <dima@did.ua>" 
+
+
 
 
 echo "[+] Деинсталяция завершена."
