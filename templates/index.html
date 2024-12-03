@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Служба Шифрования</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f7fa;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            width: 80%;
+            margin: 0 auto;
+            padding-top: 50px;
+        }
+
+        h1, h2 {
+            color: #333;
+            text-align: center;
+        }
+
+        .tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .tabs button {
+            padding: 12px 20px;
+            margin: 0 8px;
+            font-size: 18px;
+            cursor: pointer;
+            border: 2px solid #007bff;
+            border-radius: 12px;
+            background-color: #f4f7fa;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
+
+        .tabs button:hover {
+            background-color: #007bff;
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .tabs button.active {
+            background-color: #007bff;
+            color: white;
+            box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        form {
+            background-color: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        label {
+            display: block;
+            margin: 10px 0 5px;
+            font-weight: bold;
+        }
+
+        input[type="text"] {
+            width: 99%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .result {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #e7f7e7;
+            border: 1px solid #d0e6d0;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+
+        .error {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+
+        .success {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+
+        /* Стили для разделов с примером */
+        .example-section {
+            background-color: #ffffff;
+            padding: 20px;
+            margin: 20px 0;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .example-section h3 {
+            text-align: center;
+            color: #333;
+        }
+
+        .example-section pre {
+            background-color: #f5f5f5;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: "Courier New", Courier, monospace;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            margin: 10px 0;
+        }
+
+        .example-section p {
+            text-align: center;
+            font-size: 18px;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Служба шифрования и расшифровки</h1>
+
+        {% if error_message %}
+            <div class="result error">
+                <p><strong>Ошибка:</strong> {{ error_message }}</p>
+            </div>
+        {% endif %}
+
+        <!-- Вкладки для выбора алгоритма -->
+        <div class="tabs">
+            <button class="active" onclick="showAlgorithm('scytale')">Шифр Скитала</button>
+            <button onclick="showAlgorithm('kardano')">Шифр Кардано</button>
+        </div>
+
+         <!-- Раздел Шифра Сцифала -->
+        <div class="section active" id="scytale">
+            <h2>Шифр "скитала"</h2>
+            <p><strong>История:</strong> Шифр "скитала" — это древний метод шифрования, использовавшийся греками. Он работает путем записи сообщения на полоске пергамента, обвиваемой вокруг цилиндра, что делает его нечитабельным, если у получателя нет цилиндра такого же диаметра.</p>
+            <p><strong>Криптографическая стойкость:</strong> Алгоритм "скитала" является крайне простым и крайне уязвимым с точки зрения криптографии, особенно с учетом современных вычислительных мощностей.
+                        Основная криптостойкость алгоритма зависит от длины палки. Если злоумышленник может экспериментировать с различными длинами палки, он легко может перебрать все возможные варианты. Таким образом, без знания длины палки (или ее предварительного определения) алгоритм может быть взломан методом грубой силы, причем за линейное время.</p>
+            <h2>Пример зашифрованного сообщения</h2>
+
+            <div class="example-section">
+                <p><strong>Входное сообщение:</strong></p>
+                <pre>ТЕКСТПОСЛЕШИФРОВАНИЯСТАНЕТНЕПОНЯТНЫМ</pre>
+
+                <p><strong>Криптограмма:</strong></p>
+                <pre>ТЕИЕЕШЯПКИСОСФТНТРАЯПОНТОВЕНСАТЫЛННМ</pre>
+
+                <p><strong>Ключ для расшифровки:</strong></p>
+                <pre>gAAAAABnTstxGi_Cax_XAP8o0lB7QDeWgSlplbf5hKXzhFcFWiMhDtpXmwzS_vZct4wUkDTMBl_CnvqqL8M8GyrPxyJQ6N_ejw== ('4')</pre>
+            </div>
+
+
+            <form action="/encrypt_scytale" method="post">
+                <label for="message">Сообщение для шифрования:</label>
+                <input type="text" name="message" required>
+                <button type="submit">Зашифровать</button>
+            </form>
+
+            {% if encrypted_message %}
+                <div class="result success">
+                    <p><strong>Криптограмма:</strong> {{ encrypted_message }}</p>
+                    <p><strong>Ключ:</strong> {{ key }}</p>
+                </div>
+            {% endif %}
+            
+
+            <form action="/decrypt_scytale" method="post">
+                <label for="encrypted_message">Зашифрованное сообщение:</label>
+                <input type="text" name="encrypted_message" required>
+                <label for="key">Ключ:</label>
+                <input type="text" name="key" required>
+                <button type="submit">Расшифровать</button>
+            </form>
+
+            {% if decrypted_message %}
+                <div class="result success">
+                    <p><strong>Расшифрованное сообщение:</strong> {{ decrypted_message }}</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Раздел Шифра Кардано -->
+        <div class="section" id="kardano">
+            <h2>Шифр Кардано</h2>
+            <p><strong>История:</strong> «Шифровка решеткой» (или «Решётка Кардано») — исторически первая известная шифровальная решётка, трафарет, применявшийся для шифрования и дешифрования, выполненный в форме прямоугольной (чаще всего — квадратной) таблицы-карточки, часть ячеек которых вырезана, и через которые наносился шифротекст, применение решётки является одной из форм стеганографии </p>
+            <p><strong>Криптографическая стойкость:</strong> Как и шифр "скитала", шифр Кардано также считается ненадежным по современным стандартам криптографии. Если размер матрицы фиксирован и известен, шифр может быть относительно легко взломан с использованием методов криптоанализа, таких как анализ частотности символов и перебор возможных комбинаций. В случае с небольшими матрицами (например, 4×4) злоумышленник может использовать все возможные перестановки, что значительно снижает стойкость.
+С увеличением размера матрицы криптостойкость теоретически возрастает, однако на практике это также создает проблемы с эффективностью шифрования и расшифровки.</p>
+            <h2>Пример зашифрованного сообщения</h2>
+
+            <div class="example-section">
+                <p><strong>Входное сообщение:</strong></p>
+                <pre>ТЕКСТПОСЛЕШИФРОВАНИЯСТАНЕТНЕПОНЯТНЫМ</pre>
+
+                <p><strong>Криптограмма:</strong></p>
+                <pre>ЕШОВТТФАПЫЯЯОТННОКСТЛМСЕЕРАНТНИСНИПЕ</pre>
+
+                <p><strong>Ключ для расшифровки:</strong></p>
+                <pre>gAAAAABnTj5nXX5rVJYVR19B81wuBZ8-v9OZ3NkcxqRZ0Oj1miqC95avHF2wqx45tgmvxwgnoMpHmz7a5ivL8hJWdfxh_4nm_w== ('242431134')</pre>
+            </div>
+
+            <form action="/encrypt_grille" method="post">
+                <label for="message">Сообщение для шифрования:</label>
+                <input type="text" name="message" required>
+                <button type="submit">Зашифровать</button>
+            </form>
+
+            {% if encrypted_message_grille %}
+                <div class="result success">
+                    <p><strong>Криптограмма:</strong> {{ encrypted_message_grille }}</p>
+                    <p><strong>Ключ:</strong> {{ encrypted_code }}</p>
+                </div>
+            {% endif %}
+
+            <form action="/decrypt_grille" method="post">
+                <label for="encrypted_message">Зашифрованное сообщение:</label>
+                <input type="text" name="encrypted_message" required>
+                <label for="encrypted_code">Зашифрованный код:</label>
+                <input type="text" name="encrypted_code" required>
+                <button type="submit">Расшифровать</button>
+            </form>
+
+            {% if decrypted_message_grille %}
+                <div class="result success">
+                    <p><strong>Расшифрованное сообщение:</strong> {{ decrypted_message_grille }}</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        function showAlgorithm(algorithm) {
+            const sections = document.querySelectorAll('.section');
+            sections.forEach((section) => section.classList.remove('active'));
+            document.getElementById(algorithm).classList.add('active');
+
+            const buttons = document.querySelectorAll('.tabs button');
+            buttons.forEach((button) => button.classList.remove('active'));
+            document.querySelector(`.tabs button[onclick="showAlgorithm('${algorithm}')"]`).classList.add('active');
+        }
+
+        window.onload = function() {
+            const activeAlgorithm = "{{ active_algorithm }}"; 
+            if (activeAlgorithm) {
+                showAlgorithm(activeAlgorithm);
+            }
+        }
+    </script>
+</body>
+</html>
+
+
+
